@@ -1,0 +1,62 @@
+@import "./head.scss";
+
+// Common
+
+.container {
+  z-index: 100;
+  background: rgba($c-dark, 0.15);
+  @include no-select;
+}
+
+// Modal
+
+.modal {
+  background: $c-light;
+  padding: $g-m;
+  border-radius: $r;
+  box-shadow: $s-overlay;
+  overflow: hidden;
+}
+
+// Dialog
+
+.dialog {
+  min-width: 250px;
+  background: $c-light;
+  border-radius: $r;
+  box-shadow: $s-overlay;
+  overflow: hidden;
+}
+
+.content {
+  padding: $g-l;
+  text-align: center;
+}
+
+.actionContainer {
+  display: flex;
+  border-top: solid 1px $c-divider;
+}
+
+.action {
+  flex: 1;
+  padding: $g-s 0;
+  border-right: solid 1px $c-divider;
+  transition: background $de;
+
+  &:last-of-type {
+    border-right: none;
+  }
+
+  &:hover {
+    background: $c-divider;
+  }
+}
+
+.actionLabel {
+  font-weight: $b;
+}
+
+.highlight {
+  background: $c-main;
+}

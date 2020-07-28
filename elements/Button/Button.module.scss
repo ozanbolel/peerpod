@@ -1,0 +1,24 @@
+@import "styles/head";
+
+.button {
+  background: transparent;
+  color: $c-light;
+  border: solid 1px $c-light;
+  border-radius: $r;
+  transition: background $de, color $de;
+
+  &:hover,
+  &:disabled,
+  &.active {
+    background: $c-light;
+    color: $c-dark;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  span {
+    font-weight: $b;
+  }
+}

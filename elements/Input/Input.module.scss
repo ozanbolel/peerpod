@@ -1,0 +1,14 @@
+@import "styles/head";
+
+.input {
+  background: rgba($c-light, 0.15);
+  color: $c-light;
+  border: solid 1px rgba($c-light, 0.15);
+  border-radius: $r;
+  transition: border-color $de;
+
+  &:hover,
+  &:focus {
+    border-color: $c-light;
+  }
+}

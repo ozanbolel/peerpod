@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Input } from "elements/Input/Input";
-import { Button } from "elements/Button/Button";
+import { Button, IButtonProps } from "elements/Button/Button";
 
 interface IFormProps {
   className?: string;
@@ -9,7 +9,7 @@ interface IFormProps {
 
 type Form = React.FC<IFormProps> & {
   Input: typeof Input;
-  Button: typeof Button;
+  Submit: typeof Button;
 };
 
 export const Form: Form = ({ children, className, onSubmit }) => {
@@ -27,4 +27,4 @@ export const Form: Form = ({ children, className, onSubmit }) => {
 };
 
 Form.Input = Input;
-Form.Button = Button;
+Form.Submit = (props: IButtonProps) => <Button type="submit" {...props} />;

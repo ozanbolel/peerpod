@@ -41,6 +41,7 @@ export const useRTC = (
   // Send Message
 
   const sendMessage = (message: string) => {
+    dispatch({ type: "ADD_MESSAGE", payload: { id: generateId(), nickname, message } });
     socket.emit("message", { nickname, message });
   };
 

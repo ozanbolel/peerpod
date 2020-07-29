@@ -49,11 +49,39 @@ const Peers: React.FC = () => {
   );
 };
 
+const Messages: React.FC<{ sendMessage: Function }> = ({ sendMessage }) => {
+  const [message, setMessage] = React.useState("");
+  const { state } = useRTCContext();
+
+  const onSubmit = () => {
+    sendMessage(message);
+    setMessage("");
+  };
+
+  return (
+    <div className={css.messagesContainer}>
+      <div className={css.messages}>
+        {state.messages.map((message) => (
+          <div key={message.id}>
+            <span className={css.bold}>{message.nickname}: </span>
+            <span>{message.message}</span>
+          </div>
+        ))}
+      </div>
+
+      <Form onSubmit={onSubmit}>
+        <Form.Input controller={[message, setMessage]} placeholder="Message..." required />
+        <Form.Submit label="SEND" />
+      </Form>
+    </div>
+  );
+};
+
 const Home: React.FC = () => {
   const [roomId, setRoomId] = React.useState(generateId());
   const [nickname, setNickname] = React.useState("");
   const { startLocalStream, localStream, stopLocalStream, toggleMuted, isMuted } = useLocalStream();
-  const { connect, disconnect, isConnected } = useRTC(roomId, nickname, startLocalStream, localStream, stopLocalStream);
+  const { connect, disconnect, isConnected, sendMessage } = useRTC(roomId, nickname, startLocalStream, localStream, stopLocalStream);
 
   React.useEffect(() => {
     const storedRoomId = localStorage.getItem("ROOM_ID");
@@ -76,6 +104,8 @@ const Home: React.FC = () => {
       <div className={css.home}>
         <Peers />
 
+        {isConnected ? <Messages sendMessage={sendMessage} /> : null}
+
         <div className={css.actionbar}>
           {isConnected ? (
             <>
@@ -86,7 +116,7 @@ const Home: React.FC = () => {
             <Form onSubmit={onSubmit}>
               <Form.Input controller={[roomId, setRoomId]} placeholder="Room ID..." length={16} required />
               <Form.Input controller={[nickname, setNickname]} placeholder="Nickname..." minLength={2} maxLength={36} required />
-              <Form.Button type="submit" label="CONNECT" />
+              <Form.Submit label="CONNECT" />
             </Form>
           )}
         </div>

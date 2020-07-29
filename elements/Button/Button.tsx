@@ -2,7 +2,7 @@ import * as React from "react";
 import { cns, playFeedback } from "tools";
 import css from "./Button.module.scss";
 
-interface IButtonProps {
+export interface IButtonProps {
   type?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
   label: string;
   className?: string;

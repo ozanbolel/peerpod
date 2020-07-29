@@ -5,6 +5,7 @@
   width: 100%;
   height: 100%;
   background: rgba($c-dark, 0.85);
+  color: $c-light;
   transition: background $de;
 
   &.connected {
@@ -61,6 +62,7 @@
   width: 220px;
   height: 220px;
   background: $c-light;
+  color: $c-dark;
   border-radius: $r;
   animation: cardIn $de;
   margin-right: $g-l;
@@ -72,6 +74,44 @@
   span {
     font-size: $h3;
     font-weight: $b;
+  }
+}
+
+.messagesContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: rgba($c-dark, 0.3);
+  padding: 0 25%;
+
+  .messages {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow-x: hidden;
+    overflow-y: scroll;
+  }
+
+  .bold {
+    font-weight: $b;
+  }
+
+  form {
+    display: flex;
+    padding: $g-s 0;
+    text-align: center;
+
+    input {
+      flex: 1;
+      padding: $g-xs;
+      margin-right: $g-s;
+    }
+
+    button {
+      width: 100px;
+      padding: $g-xs 0;
+    }
   }
 }
 

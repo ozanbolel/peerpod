@@ -2,7 +2,8 @@ import * as React from "react";
 import io from "socket.io-client";
 import { useRTCContext } from "store";
 import { serverUrl, rtcConfig, rtcOfferOptions } from "config";
-import { IPeerCore, IPeerProfile, IPeerOffer, IPeerAnswer, IPeerCandidate, ILocalStreamState } from "types";
+import { IPeerCore, IPeerProfile, IPeerOffer, IPeerAnswer, IPeerCandidate, ILocalStreamState, IPeerMessageData } from "types";
+import { generateId } from "./generateId";
 
 export const useRTC = (
   roomId: string,
@@ -35,6 +36,12 @@ export const useRTC = (
 
     dispatch({ type: "SET_IS_CONNECTED", payload: false });
     dispatch({ type: "RESET_PEERS" });
+  };
+
+  // Send Message
+
+  const sendMessage = (message: string) => {
+    socket.emit("message", { nickname, message });
   };
 
   // Create Peer Connection
@@ -159,11 +166,24 @@ export const useRTC = (
     };
   }, [state.peers]);
 
+  // On Message
+
+  React.useEffect(() => {
+    socket.on("message", (data: IPeerMessageData) => {
+      dispatch({ type: "ADD_MESSAGE", payload: { id: generateId(), ...data } });
+    });
+
+    return () => {
+      socket.off("message");
+    };
+  }, []);
+
   // Return
 
   return {
     connect,
     disconnect,
+    sendMessage,
     ...state
   };
 };

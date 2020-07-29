@@ -1,13 +1,14 @@
-import { IPeer } from "./peer";
+import { IPeer, IPeerMessage } from "./peer";
 
 // RTC
 
 export interface IRTCState {
   isConnected: boolean;
   peers: IPeer[];
+  messages: IPeerMessage[];
 }
 
-export type RTCActionType = "SET_IS_CONNECTED" | "ADD_PEER" | "REMOVE_PEER" | "RESET_PEERS";
+export type RTCActionType = "SET_IS_CONNECTED" | "ADD_PEER" | "REMOVE_PEER" | "RESET_PEERS" | "ADD_MESSAGE";
 
 export interface IRTCAction {
   type: RTCActionType;

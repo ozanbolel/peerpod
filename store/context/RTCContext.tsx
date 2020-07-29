@@ -3,7 +3,8 @@ import { IRTCState, IRTCAction, IRTCContext } from "types";
 
 const rtcInitialState: IRTCState = {
   isConnected: false,
-  peers: []
+  peers: [],
+  messages: []
 };
 
 const rtcReducer = (state: IRTCState, action: IRTCAction) => {
@@ -26,6 +27,11 @@ const rtcReducer = (state: IRTCState, action: IRTCAction) => {
     case "RESET_PEERS":
       return Object.assign({}, state, {
         peers: rtcInitialState.peers
+      });
+
+    case "ADD_MESSAGE":
+      return Object.assign({}, state, {
+        messages: [...state.messages, action.payload]
       });
 
     default:

@@ -21,3 +21,12 @@ export interface IPeerAnswer extends IPeerCore {
 export interface IPeerCandidate extends IPeerCore {
   candidate: RTCIceCandidateInit;
 }
+
+export interface IPeerMessageData {
+  nickname: IPeerProfile["nickname"];
+  message: string;
+}
+
+export interface IPeerMessage extends IPeerMessageData {
+  id: string;
+}

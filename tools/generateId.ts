@@ -11,9 +11,8 @@ const gen = (len: number) => {
   return hexArray.join("");
 };
 
-export const generateId = () => {
+export const generateId = (length = 16) => {
   if (typeof window !== "undefined") {
-    const length = 16;
     let result = "";
 
     const loop = () => {

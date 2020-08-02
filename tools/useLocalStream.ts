@@ -52,8 +52,8 @@ export const useLocalStream = () => {
       } else {
         mic.enabled = true;
         soundMeter.start(() => {
-          const gateKeeper = () => (soundMeter.instant > 0.01 ? (mic.enabled = true) : (mic.enabled = false));
-          const interval = setInterval(gateKeeper, 10);
+          const gateKeeper = () => (soundMeter.instant > 0.005 ? (mic.enabled = true) : (mic.enabled = false));
+          const interval = setInterval(gateKeeper, 5);
           setGateInterval(interval);
         });
       }

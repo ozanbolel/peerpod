@@ -52,17 +52,27 @@ const Peers: React.FC = () => {
 const Messages: React.FC<{ sendMessage: Function }> = ({ sendMessage }) => {
   const [message, setMessage] = React.useState("");
   const { state } = useRTCContext();
+  const refMessages = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const elemMessages = refMessages.current;
+    if (elemMessages) elemMessages.scrollTop = elemMessages.scrollHeight;
+
+    if (state.messages.length !== 0) playFeedback("message");
+  }, [state.messages]);
 
   const onSubmit = () => {
-    sendMessage(message);
-    setMessage("");
+    if (message.trim().length !== 0) {
+      sendMessage(message);
+      setMessage("");
+    }
   };
 
   return (
-    <div className={css.messagesContainer}>
-      <div className={css.messages}>
+    <div className={css.messages}>
+      <div ref={refMessages} className={css.messageList}>
         {state.messages.map((message) => (
-          <div key={message.id}>
+          <div key={message.id} className={css.messageItem}>
             <span className={css.bold}>{message.nickname}: </span>
             <span>{message.message}</span>
           </div>
@@ -71,7 +81,7 @@ const Messages: React.FC<{ sendMessage: Function }> = ({ sendMessage }) => {
 
       <Form onSubmit={onSubmit}>
         <Form.Input controller={[message, setMessage]} placeholder="Message..." required />
-        <Form.Submit label="SEND" />
+        <Form.Submit label="SEND" noSound />
       </Form>
     </div>
   );

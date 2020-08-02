@@ -9,11 +9,12 @@ export interface IButtonProps {
   onClick?: Function;
   active?: boolean;
   disabled?: boolean;
+  noSound?: boolean;
 }
 
-export const Button: React.FC<IButtonProps> = ({ type, label, className, onClick, active, disabled }) => {
+export const Button: React.FC<IButtonProps> = ({ type, label, className, onClick, active, disabled, noSound }) => {
   const handleOnClick = () => {
-    playFeedback("pop");
+    if (!noSound) playFeedback("pop");
     if (onClick) onClick();
   };
 

@@ -77,24 +77,25 @@
   }
 }
 
-.messagesContainer {
-  flex: 1;
+.messages {
   display: flex;
   flex-direction: column;
+  height: 300px;
   background: rgba($c-dark, 0.3);
-  padding: 0 25%;
+  padding: 0 30%;
 
-  .messages {
+  .messageList {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
     overflow-x: hidden;
     overflow-y: scroll;
   }
 
-  .bold {
-    font-weight: $b;
+  .messageItem {
+    margin-top: $g-xxs;
+
+    .bold {
+      font-weight: $b;
+    }
   }
 
   form {

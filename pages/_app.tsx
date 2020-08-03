@@ -30,12 +30,12 @@ const App = ({ Component, pageProps }: AppProps) => {
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="" />
           <link rel="apple-touch-icon" href="" />
-          <meta name="description" content="" />
+          <meta name="description" content="Peer to peer voice chat." />
           <meta property="og:title" content="PeerPod" />
-          <meta property="og:description" content="" />
+          <meta property="og:description" content="Peer to peer voice chat." />
           <meta property="og:image" content="" />
           <meta property="twitter:title" content="PeerPod" />
-          <meta property="twitter:description" content="" />
+          <meta property="twitter:description" content="Peer to peer voice chat." />
           <meta property="twitter:image" content="" />
         </Head>
 

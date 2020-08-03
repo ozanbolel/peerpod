@@ -8,7 +8,7 @@ export interface IRTCState {
   messages: IPeerMessage[];
 }
 
-export type RTCActionType = "SET_IS_CONNECTED" | "ADD_PEER" | "REMOVE_PEER" | "RESET_PEERS" | "ADD_MESSAGE";
+export type RTCActionType = "SET_IS_CONNECTED" | "ADD_PEER" | "REMOVE_PEER" | "ADD_MESSAGE" | "RESET_RTC";
 
 export interface IRTCAction {
   type: RTCActionType;
@@ -24,11 +24,10 @@ export interface IRTCContext {
 
 export interface ILocalStreamState {
   localStream: MediaStream | null;
-  meterStream: MediaStream | null;
   isMuted: boolean;
 }
 
-export type LocalStreamActionType = "SET_LOCAL_STREAM" | "SET_METER_STREAM" | "SET_IS_MUTED" | "RESET_STREAMS";
+export type LocalStreamActionType = "SET_LOCAL_STREAM" | "SET_IS_MUTED" | "RESET_LOCAL_STREAM";
 
 export interface ILocalStreamAction {
   type: LocalStreamActionType;

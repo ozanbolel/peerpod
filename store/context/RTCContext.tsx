@@ -24,15 +24,13 @@ const rtcReducer = (state: IRTCState, action: IRTCAction) => {
         peers: state.peers.filter((peer) => peer.id !== action.payload)
       });
 
-    case "RESET_PEERS":
-      return Object.assign({}, state, {
-        peers: rtcInitialState.peers
-      });
-
     case "ADD_MESSAGE":
       return Object.assign({}, state, {
         messages: [...state.messages, action.payload]
       });
+
+    case "RESET_RTC":
+      return rtcInitialState;
 
     default:
       return state;

@@ -3,7 +3,6 @@ import { ILocalStreamState, ILocalStreamAction, ILocalStreamContext } from "type
 
 const localStreamInitialState: ILocalStreamState = {
   localStream: null,
-  meterStream: null,
   isMuted: false
 };
 
@@ -14,18 +13,13 @@ const localStreamReducer = (state: ILocalStreamState, action: ILocalStreamAction
         localStream: action.payload
       });
 
-    case "SET_METER_STREAM":
-      return Object.assign({}, state, {
-        meterStream: action.payload
-      });
-
     case "SET_IS_MUTED":
       return Object.assign({}, state, {
         isMuted: action.payload
       });
 
-    case "RESET_STREAMS":
-      return Object.assign({}, state, localStreamInitialState);
+    case "RESET_LOCAL_STREAM":
+      return localStreamInitialState;
 
     default:
       return state;

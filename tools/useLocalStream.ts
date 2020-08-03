@@ -1,10 +1,8 @@
-import * as React from "react";
 import { useLocalStreamContext } from "store";
 import { mediaStreamConstraints } from "config";
-import { SoundMeter } from "./SoundMeter";
+import { createNoiseGate } from "./createNoiseGate";
 
 export const useLocalStream = () => {
-  const [gateInterval, setGateInterval] = React.useState<NodeJS.Timeout>();
   const { state, dispatch } = useLocalStreamContext();
 
   // Controllers
@@ -12,11 +10,16 @@ export const useLocalStream = () => {
   const startLocalStream: () => Promise<MediaStream | null> = () =>
     new Promise(async (resolve, reject) => {
       const localStream = await navigator.mediaDevices.getUserMedia(mediaStreamConstraints);
-      const meterStream = await navigator.mediaDevices.getUserMedia(mediaStreamConstraints);
 
-      if (localStream && meterStream) {
+      if (localStream) {
+        const audioContext = new AudioContext();
+        const source = audioContext.createMediaStreamSource(localStream);
+        const noiseGate = createNoiseGate(audioContext);
+
+        source.connect(noiseGate);
+        noiseGate.connect(audioContext.destination);
+
         dispatch({ type: "SET_LOCAL_STREAM", payload: localStream });
-        dispatch({ type: "SET_METER_STREAM", payload: meterStream });
         resolve(localStream);
       } else {
         reject(null);
@@ -24,45 +27,29 @@ export const useLocalStream = () => {
     });
 
   const stopLocalStream = () => {
-    const { localStream, meterStream } = state;
+    const { localStream } = state;
 
-    if (localStream && meterStream) {
+    if (localStream) {
       for (let track of localStream.getTracks()) track.stop();
-      for (let track of meterStream.getTracks()) track.stop();
-      dispatch({ type: "RESET_STREAMS" });
+      dispatch({ type: "RESET_LOCAL_STREAM" });
     }
   };
 
   const toggleMuted = () => {
-    dispatch({ type: "SET_IS_MUTED", payload: !state.isMuted });
-  };
+    const { localStream, isMuted } = state;
 
-  // Noise Gate
-
-  React.useEffect(() => {
-    const { localStream, meterStream, isMuted } = state;
-
-    if (localStream && meterStream) {
-      const soundMeter = new SoundMeter(meterStream);
+    if (localStream) {
       const mic = localStream.getAudioTracks()[0];
 
       if (isMuted) {
-        if (gateInterval) clearInterval(gateInterval);
-        mic.enabled = false;
-      } else {
         mic.enabled = true;
-        soundMeter.start(() => {
-          const gateKeeper = () => (soundMeter.instant > 0.005 ? (mic.enabled = true) : (mic.enabled = false));
-          const interval = setInterval(gateKeeper, 5);
-          setGateInterval(interval);
-        });
+      } else {
+        mic.enabled = false;
       }
 
-      return () => {
-        soundMeter.stop();
-      };
+      dispatch({ type: "SET_IS_MUTED", payload: !isMuted });
     }
-  }, [state]);
+  };
 
   // Return
 

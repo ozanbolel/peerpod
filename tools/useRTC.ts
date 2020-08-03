@@ -34,8 +34,7 @@ export const useRTC = (
     socket.close();
     stopLocalStream();
 
-    dispatch({ type: "SET_IS_CONNECTED", payload: false });
-    dispatch({ type: "RESET_PEERS" });
+    dispatch({ type: "RESET_RTC" });
   };
 
   // Send Message

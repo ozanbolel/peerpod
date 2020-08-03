@@ -1,5 +1,5 @@
 const compressorOptions: DynamicsCompressorOptions = {
-  threshold: -50,
+  threshold: -25,
   knee: 40,
   ratio: 12,
   attack: 0,
@@ -7,9 +7,9 @@ const compressorOptions: DynamicsCompressorOptions = {
 };
 
 const filterOptions: BiquadFilterOptions = {
-  Q: 8.3,
-  frequency: 355,
-  gain: 3.0,
+  Q: 1,
+  frequency: 350,
+  gain: 3,
   type: "bandpass"
 };
 

@@ -9,15 +9,18 @@ export const useLocalStream = () => {
 
   const startLocalStream: () => Promise<MediaStream | null> = () =>
     new Promise(async (resolve, reject) => {
-      const localStream = await navigator.mediaDevices.getUserMedia(mediaStreamConstraints);
+      const userMedia = await navigator.mediaDevices.getUserMedia(mediaStreamConstraints);
 
-      if (localStream) {
+      if (userMedia) {
         const audioContext = new AudioContext();
-        const source = audioContext.createMediaStreamSource(localStream);
+        const source = audioContext.createMediaStreamSource(userMedia);
+        const destination = audioContext.createMediaStreamDestination();
         const noiseGate = createNoiseGate(audioContext);
 
         source.connect(noiseGate);
-        noiseGate.connect(audioContext.destination);
+        noiseGate.connect(destination);
+
+        const localStream = destination.stream;
 
         dispatch({ type: "SET_LOCAL_STREAM", payload: localStream });
         resolve(localStream);

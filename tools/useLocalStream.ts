@@ -1,6 +1,6 @@
 import { useLocalStreamContext } from "store";
 import { mediaStreamConstraints } from "config";
-import { createNoiseGate } from "./createNoiseGate";
+import { StreamModule } from "./StreamModule";
 
 export const useLocalStream = () => {
   const { state, dispatch } = useLocalStreamContext();
@@ -9,24 +9,26 @@ export const useLocalStream = () => {
 
   const startLocalStream: () => Promise<MediaStream | null> = () =>
     new Promise(async (resolve, reject) => {
-      const userMedia = await navigator.mediaDevices.getUserMedia(mediaStreamConstraints);
+      const audioContext = new AudioContext();
+      const destination = audioContext.createMediaStreamDestination();
+      const streamModule = new StreamModule(audioContext, 4096);
 
-      if (userMedia) {
-        const audioContext = new AudioContext();
-        const source = audioContext.createMediaStreamSource(userMedia);
-        const destination = audioContext.createMediaStreamDestination();
-        const noiseGate = createNoiseGate(audioContext);
+      streamModule
+        .setup(
+          mediaStreamConstraints,
+          () => {},
+          () => {
+            reject(null);
+          }
+        )
+        .ready()
+        .start(destination);
 
-        source.connect(noiseGate);
-        noiseGate.connect(destination);
+      streamModule.module("noisegate").param("level", 0.5);
+      streamModule.module("noisesuppressor").param("threshold", 0.5);
 
-        const localStream = destination.stream;
-
-        dispatch({ type: "SET_LOCAL_STREAM", payload: localStream });
-        resolve(localStream);
-      } else {
-        reject(null);
-      }
+      dispatch({ type: "SET_LOCAL_STREAM", payload: destination.stream });
+      resolve(destination.stream);
     });
 
   const stopLocalStream = () => {

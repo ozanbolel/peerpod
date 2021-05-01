@@ -32,7 +32,7 @@ const PeerCard: React.FC<{ peer: IPeer }> = ({ peer }) => {
   return (
     <div className={css.peerCard}>
       <span>{peer.nickname}</span>
-      <audio ref={refAudio} autoPlay controls />
+      <audio ref={refAudio} autoPlay />
     </div>
   );
 };

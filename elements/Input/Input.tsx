@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cns } from "tools";
+import { cns } from "utils";
 import css from "./Input.module.scss";
 
 interface IInputProps {
@@ -16,7 +16,19 @@ interface IInputProps {
   required?: boolean;
 }
 
-export const Input: React.FC<IInputProps> = ({ ref, type, className, controller, placeholder, minLength, maxLength, length, min, max, required }) => {
+export const Input: React.FC<IInputProps> = ({
+  ref,
+  type,
+  className,
+  controller,
+  placeholder,
+  minLength,
+  maxLength,
+  length,
+  min,
+  max,
+  required
+}) => {
   const state = controller ? controller[0] : undefined;
   const setState = controller ? controller[1] : undefined;
 

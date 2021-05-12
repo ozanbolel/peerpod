@@ -1,7 +1,7 @@
 import * as React from "react";
 import Linkify from "react-linkify";
 import { Button, Form } from "elements";
-import { useRTC, playFeedback, useLocalStream, cns, generateId } from "tools";
+import { useRTC, playFeedback, useLocalStream, cns, generateId } from "utils";
 import { useRTCContext } from "store";
 import { IPeer } from "types";
 import css from "./Home.module.scss";

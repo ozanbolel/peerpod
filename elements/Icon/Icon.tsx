@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cns } from "tools";
+import { cns } from "utils";
 import css from "./Icon.module.scss";
 
 interface IIconProps {

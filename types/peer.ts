@@ -30,3 +30,8 @@ export interface IPeerMessageData {
 export interface IPeerMessage extends IPeerMessageData {
   id: string;
 }
+
+export interface ISongInfo {
+  title: string;
+  url: string;
+}

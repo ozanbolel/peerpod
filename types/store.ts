@@ -1,4 +1,4 @@
-import { IPeer, IPeerMessage } from "./peer";
+import { IPeer, IPeerMessage, ISongInfo } from "./peer";
 
 // RTC
 
@@ -6,9 +6,16 @@ export interface IRTCState {
   isConnected: boolean;
   peers: IPeer[];
   messages: IPeerMessage[];
+  songInfo: ISongInfo | undefined;
 }
 
-export type RTCActionType = "SET_IS_CONNECTED" | "ADD_PEER" | "REMOVE_PEER" | "ADD_MESSAGE" | "RESET_RTC";
+export type RTCActionType =
+  | "SET_IS_CONNECTED"
+  | "ADD_PEER"
+  | "REMOVE_PEER"
+  | "ADD_MESSAGE"
+  | "SET_SONG_INFO"
+  | "RESET_RTC";
 
 export interface IRTCAction {
   type: RTCActionType;
@@ -27,7 +34,10 @@ export interface ILocalStreamState {
   isMuted: boolean;
 }
 
-export type LocalStreamActionType = "SET_LOCAL_STREAM" | "SET_IS_MUTED" | "RESET_LOCAL_STREAM";
+export type LocalStreamActionType =
+  | "SET_LOCAL_STREAM"
+  | "SET_IS_MUTED"
+  | "RESET_LOCAL_STREAM";
 
 export interface ILocalStreamAction {
   type: LocalStreamActionType;

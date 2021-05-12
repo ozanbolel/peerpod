@@ -143,3 +143,25 @@
     }
   }
 }
+
+@keyframes songbarIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.songbar {
+  position: fixed;
+  top: $g-s;
+  right: $g-s;
+  padding: $g-xs;
+  background: $c-light;
+  color: $c-dark;
+  border-radius: $r;
+  animation: songbarIn $de;
+}

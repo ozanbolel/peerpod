@@ -9,7 +9,8 @@ import {
   IPeerAnswer,
   IPeerCandidate,
   ILocalStreamState,
-  IPeerMessageData
+  IPeerMessageData,
+  ISongInfo
 } from "types";
 import { generateId } from "./generateId";
 import { useInterval } from "./useInterval";
@@ -52,7 +53,11 @@ export const useRTC = (
     socket.emit("ping");
   }, 20 * 60 * 1000);
 
-  // Send Message
+  // Chat
+
+  const requestSong = (query: string) => {
+    socket.emit("song-request", { query });
+  };
 
   const sendMessage = (message: string) => {
     dispatch({
@@ -60,6 +65,11 @@ export const useRTC = (
       payload: { id: generateId(), nickname, message }
     });
     socket.emit("message", { nickname, message });
+
+    if (message.substring(0, 6) === "!play ") {
+      const query = message.substring(6).trim();
+      if (query) requestSong(query);
+    }
   };
 
   // Create Peer Connection
@@ -221,12 +231,25 @@ export const useRTC = (
     };
   }, []);
 
+  // On Song Change
+
+  React.useEffect(() => {
+    socket.on("song-change", (data: ISongInfo) => {
+      dispatch({ type: "SET_SONG_INFO", payload: data });
+    });
+
+    return () => {
+      socket.off("song-change");
+    };
+  }, []);
+
   // Return
 
   return {
     connect,
     disconnect,
     sendMessage,
+    requestSong,
     ...state
   };
 };

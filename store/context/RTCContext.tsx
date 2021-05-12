@@ -4,7 +4,8 @@ import { IRTCState, IRTCAction, IRTCContext } from "types";
 const rtcInitialState: IRTCState = {
   isConnected: false,
   peers: [],
-  messages: []
+  messages: [],
+  songInfo: undefined
 };
 
 const rtcReducer = (state: IRTCState, action: IRTCAction) => {
@@ -29,6 +30,11 @@ const rtcReducer = (state: IRTCState, action: IRTCAction) => {
         messages: [...state.messages, action.payload]
       });
 
+    case "SET_SONG_INFO":
+      return Object.assign({}, state, {
+        songInfo: action.payload
+      });
+
     case "RESET_RTC":
       return rtcInitialState;
 
@@ -41,7 +47,11 @@ export const RTCContext = React.createContext({} as IRTCContext);
 
 const RTCContextProvider: React.FC = ({ children }) => {
   const [state, dispatch] = React.useReducer(rtcReducer, rtcInitialState);
-  return <RTCContext.Provider value={{ state, dispatch }}>{children}</RTCContext.Provider>;
+  return (
+    <RTCContext.Provider value={{ state, dispatch }}>
+      {children}
+    </RTCContext.Provider>
+  );
 };
 
 export default RTCContextProvider;

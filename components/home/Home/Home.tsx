@@ -1,7 +1,14 @@
 import * as React from "react";
 import Linkify from "react-linkify";
 import { Button, Form } from "elements";
-import { useRTC, playFeedback, useLocalStream, cns, generateId } from "utils";
+import {
+  useRTC,
+  playFeedback,
+  useLocalStream,
+  cns,
+  generateId,
+  formatString
+} from "utils";
 import { useRTCContext } from "store";
 import { IPeer } from "types";
 import css from "./Home.module.scss";
@@ -122,13 +129,14 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
     toggleMuted,
     isMuted
   } = useLocalStream();
-  const { connect, disconnect, isConnected, sendMessage } = useRTC(
+  const { connect, disconnect, isConnected, sendMessage, songInfo } = useRTC(
     roomId,
     nickname,
     startLocalStream,
     localStream,
     stopLocalStream
   );
+  const refSongAudio = React.useRef<HTMLAudioElement>(null);
 
   React.useEffect(() => {
     if (!predefinedRoomId) {
@@ -196,6 +204,25 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
             </Form>
           )}
         </div>
+
+        {songInfo && (
+          <>
+            <button
+              className={css.songbar}
+              onClick={() => {
+                const songAudioElement = refSongAudio.current;
+
+                if (songAudioElement) {
+                  songAudioElement.muted = !songAudioElement.muted;
+                }
+              }}
+            >
+              {formatString(songInfo.title, 50)}
+
+              <audio ref={refSongAudio} src={songInfo?.url} autoPlay />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

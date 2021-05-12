@@ -78,8 +78,13 @@ const Messages: React.FC<{ sendMessage: Function }> = ({ sendMessage }) => {
 
             <span>
               <Linkify
-                componentDecorator={(decoratedHref, decoratedText) => (
-                  <a href={decoratedHref} target="_blank" rel="noreferrer">
+                componentDecorator={(decoratedHref, decoratedText, key) => (
+                  <a
+                    key={key}
+                    href={decoratedHref}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     {decoratedText}
                   </a>
                 )}

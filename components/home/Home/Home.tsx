@@ -154,7 +154,7 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
     if (audioElement && songInfo?.url) {
       audioElement.src = songInfo.url;
       audioElement.pause();
-      audioElement.volume = 0.2;
+      audioElement.volume = 0.05;
       audioElement.play();
     }
   }, [songInfo?.url]);

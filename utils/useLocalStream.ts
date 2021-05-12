@@ -24,7 +24,7 @@ export const useLocalStream = () => {
         .ready()
         .start(destination);
 
-      streamModule.module("noisegate").param("level", 0.5);
+      streamModule.module("noisegate").param("level", 0.15);
 
       dispatch({ type: "SET_LOCAL_STREAM", payload: destination.stream });
       resolve(destination.stream);

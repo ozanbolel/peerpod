@@ -148,6 +148,17 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
     if (storedNickname) setNickname(storedNickname);
   }, []);
 
+  React.useEffect(() => {
+    const audioElement = refSongAudio.current;
+
+    if (audioElement && songInfo?.url) {
+      audioElement.src = songInfo.url;
+      audioElement.pause();
+      audioElement.volume = 0.2;
+      audioElement.play();
+    }
+  }, [songInfo?.url]);
+
   const onSubmit = () => {
     if (!predefinedRoomId) localStorage.setItem("ROOM_ID", roomId);
     localStorage.setItem("NICKNAME", nickname);
@@ -206,24 +217,22 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
         </div>
 
         {songInfo && (
-          <>
-            <button
-              className={css.songbar}
-              onClick={() => {
-                const songAudioElement = refSongAudio.current;
+          <button
+            className={css.songbar}
+            onClick={() => {
+              const songAudioElement = refSongAudio.current;
 
-                if (songAudioElement) {
-                  songAudioElement.muted = !songAudioElement.muted;
-                }
-              }}
-            >
-              {formatString(songInfo.title, 50)}
-
-              <audio ref={refSongAudio} src={songInfo?.url} autoPlay />
-            </button>
-          </>
+              if (songAudioElement) {
+                songAudioElement.muted = !songAudioElement.muted;
+              }
+            }}
+          >
+            {formatString(songInfo.title, 50)}
+          </button>
         )}
       </div>
+
+      <audio ref={refSongAudio} autoPlay />
     </div>
   );
 };

@@ -1,9 +1,18 @@
 import * as React from "react";
-import io from "socket.io-client";
+import { io } from "socket.io-client";
 import { useRTCContext } from "store";
 import { serverUrl, rtcConfig, rtcOfferOptions } from "config";
-import { IPeerCore, IPeerProfile, IPeerOffer, IPeerAnswer, IPeerCandidate, ILocalStreamState, IPeerMessageData } from "types";
+import {
+  IPeerCore,
+  IPeerProfile,
+  IPeerOffer,
+  IPeerAnswer,
+  IPeerCandidate,
+  ILocalStreamState,
+  IPeerMessageData
+} from "types";
 import { generateId } from "./generateId";
+import { useInterval } from "./useInterval";
 
 export const useRTC = (
   roomId: string,
@@ -12,7 +21,7 @@ export const useRTC = (
   localStream: ILocalStreamState["localStream"],
   stopLocalStream: Function
 ) => {
-  const socket = React.useMemo(() => io.connect(serverUrl, { autoConnect: false }), []);
+  const socket = React.useRef(io(serverUrl, { autoConnect: false })).current;
   const { state, dispatch } = useRTCContext();
 
   // Connection
@@ -37,22 +46,39 @@ export const useRTC = (
     dispatch({ type: "RESET_RTC" });
   };
 
+  // Keep Server Awake
+
+  useInterval(() => {
+    socket.emit("ping");
+  }, 20 * 60 * 1000);
+
   // Send Message
 
   const sendMessage = (message: string) => {
-    dispatch({ type: "ADD_MESSAGE", payload: { id: generateId(), nickname, message } });
+    dispatch({
+      type: "ADD_MESSAGE",
+      payload: { id: generateId(), nickname, message }
+    });
     socket.emit("message", { nickname, message });
   };
 
   // Create Peer Connection
 
-  const createPeerConnection = (id: IPeerProfile["id"], localStream: ILocalStreamState["localStream"]) => {
+  const createPeerConnection = (
+    id: IPeerProfile["id"],
+    localStream: ILocalStreamState["localStream"]
+  ) => {
     if (localStream) {
       const peerConnection = new RTCPeerConnection(rtcConfig);
 
       peerConnection.onicecandidate = (event) => {
         const { candidate } = event;
-        if (candidate) socket.emit("iceCandidate", { senderId: socket.id, destId: id, candidate });
+        if (candidate)
+          socket.emit("iceCandidate", {
+            senderId: socket.id,
+            destId: id,
+            candidate
+          });
       };
 
       for (let track of localStream.getTracks()) peerConnection.addTrack(track);
@@ -92,7 +118,12 @@ export const useRTC = (
         const offer = await peerConnection.createOffer(rtcOfferOptions);
         peerConnection.setLocalDescription(offer);
 
-        socket.emit("offer", { senderId: socket.id, destId: data.id, nickname, offer });
+        socket.emit("offer", {
+          senderId: socket.id,
+          destId: data.id,
+          nickname,
+          offer
+        });
       }
     });
 
@@ -110,7 +141,9 @@ export const useRTC = (
       if (peerConnection) {
         addPeer(data, peerConnection);
 
-        peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+        peerConnection.setRemoteDescription(
+          new RTCSessionDescription(data.offer)
+        );
         const answer = await peerConnection.createAnswer();
         peerConnection.setLocalDescription(answer);
 
@@ -127,8 +160,13 @@ export const useRTC = (
 
   React.useEffect(() => {
     socket.on("answer", (data: IPeerAnswer) => {
-      const peerConnection = state.peers.find((peer) => peer.id === data.id)?.connection;
-      if (peerConnection) peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+      const peerConnection = state.peers.find(
+        (peer) => peer.id === data.id
+      )?.connection;
+      if (peerConnection)
+        peerConnection.setRemoteDescription(
+          new RTCSessionDescription(data.answer)
+        );
     });
 
     return () => {
@@ -140,8 +178,11 @@ export const useRTC = (
 
   React.useEffect(() => {
     socket.on("iceCandidate", (data: IPeerCandidate) => {
-      const peerConnection = state.peers.find((peer) => peer.id === data.id)?.connection;
-      if (peerConnection) peerConnection.addIceCandidate(data.candidate).catch(() => {});
+      const peerConnection = state.peers.find(
+        (peer) => peer.id === data.id
+      )?.connection;
+      if (peerConnection)
+        peerConnection.addIceCandidate(data.candidate).catch(() => {});
     });
 
     return () => {
@@ -153,7 +194,9 @@ export const useRTC = (
 
   React.useEffect(() => {
     socket.on("disconnected", (data: IPeerCore) => {
-      const peerConnection = state.peers.find((peer) => peer.id === data.id)?.connection;
+      const peerConnection = state.peers.find(
+        (peer) => peer.id === data.id
+      )?.connection;
 
       if (peerConnection) {
         peerConnection.close();

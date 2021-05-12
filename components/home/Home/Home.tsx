@@ -1,4 +1,5 @@
 import * as React from "react";
+import Linkify from "react-linkify";
 import { Button, Form } from "elements";
 import { useRTC, playFeedback, useLocalStream, cns, generateId } from "tools";
 import { useRTCContext } from "store";
@@ -74,41 +75,80 @@ const Messages: React.FC<{ sendMessage: Function }> = ({ sendMessage }) => {
         {state.messages.map((message) => (
           <div key={message.id} className={css.messageItem}>
             <span className={css.bold}>{message.nickname}: </span>
-            <span>{message.message}</span>
+
+            <span>
+              <Linkify
+                componentDecorator={(decoratedHref, decoratedText) => (
+                  <a href={decoratedHref} target="_blank" rel="noreferrer">
+                    {decoratedText}
+                  </a>
+                )}
+              >
+                {message.message}
+              </Linkify>
+            </span>
           </div>
         ))}
       </div>
 
       <Form onSubmit={onSubmit}>
-        <Form.Input controller={[message, setMessage]} placeholder="Message..." required />
+        <Form.Input
+          controller={[message, setMessage]}
+          placeholder="Message..."
+          required
+        />
         <Form.Submit label="SEND" noSound />
       </Form>
     </div>
   );
 };
 
-const Home: React.FC = () => {
-  const [roomId, setRoomId] = React.useState(generateId());
+interface IHomeProps {
+  predefinedRoomId?: string;
+}
+
+const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
+  const [roomId, setRoomId] = React.useState(predefinedRoomId || generateId());
   const [nickname, setNickname] = React.useState("");
-  const { startLocalStream, localStream, stopLocalStream, toggleMuted, isMuted } = useLocalStream();
-  const { connect, disconnect, isConnected, sendMessage } = useRTC(roomId, nickname, startLocalStream, localStream, stopLocalStream);
+  const {
+    startLocalStream,
+    localStream,
+    stopLocalStream,
+    toggleMuted,
+    isMuted
+  } = useLocalStream();
+  const { connect, disconnect, isConnected, sendMessage } = useRTC(
+    roomId,
+    nickname,
+    startLocalStream,
+    localStream,
+    stopLocalStream
+  );
 
   React.useEffect(() => {
-    const storedRoomId = localStorage.getItem("ROOM_ID");
-    const storedNickname = localStorage.getItem("NICKNAME");
+    if (!predefinedRoomId) {
+      const storedRoomId = localStorage.getItem("ROOM_ID");
+      if (storedRoomId) setRoomId(storedRoomId);
+    }
 
-    if (storedRoomId) setRoomId(storedRoomId);
+    const storedNickname = localStorage.getItem("NICKNAME");
     if (storedNickname) setNickname(storedNickname);
   }, []);
 
   const onSubmit = () => {
-    localStorage.setItem("ROOM_ID", roomId);
+    if (!predefinedRoomId) localStorage.setItem("ROOM_ID", roomId);
     localStorage.setItem("NICKNAME", nickname);
     connect();
   };
 
   return (
-    <div className={cns([css.homeContainer, [css.connected, isConnected], [css.muted, isMuted]])}>
+    <div
+      className={cns([
+        css.homeContainer,
+        [css.connected, isConnected],
+        [css.muted, isMuted]
+      ])}
+    >
       <div className={css.tint} />
 
       <div className={css.home}>
@@ -119,13 +159,34 @@ const Home: React.FC = () => {
         <div className={css.actionbar}>
           {isConnected ? (
             <>
-              <Button label="CONNECTED" onClick={() => disconnect()} active={true} />
-              <Button label={isMuted ? "MUTED" : "MUTE"} onClick={() => toggleMuted()} active={isMuted} />
+              <Button
+                label="CONNECTED"
+                onClick={() => disconnect()}
+                active={true}
+              />
+              <Button
+                label={isMuted ? "MUTED" : "MUTE"}
+                onClick={() => toggleMuted()}
+                active={isMuted}
+              />
             </>
           ) : (
             <Form onSubmit={onSubmit}>
-              <Form.Input controller={[roomId, setRoomId]} placeholder="Room ID..." length={16} required />
-              <Form.Input controller={[nickname, setNickname]} placeholder="Nickname..." minLength={2} maxLength={36} required />
+              {!predefinedRoomId && (
+                <Form.Input
+                  controller={[roomId, setRoomId]}
+                  placeholder="Room ID..."
+                  length={16}
+                  required
+                />
+              )}
+              <Form.Input
+                controller={[nickname, setNickname]}
+                placeholder="Nickname..."
+                minLength={2}
+                maxLength={36}
+                required
+              />
               <Form.Submit label="CONNECT" />
             </Form>
           )}

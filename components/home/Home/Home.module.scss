@@ -98,6 +98,10 @@
     }
   }
 
+  .messageItem a {
+    border-bottom: solid 1px $c-light;
+  }
+
   form {
     display: flex;
     padding: $g-s 0;

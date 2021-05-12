@@ -25,7 +25,7 @@ export const useLocalStream = () => {
         .start(destination);
 
       streamModule.module("noisegate").param("level", 1);
-      streamModule.module("noisesuppressor").param("threshold", 0.5);
+      streamModule.module("noisesuppressor").param("threshold", 0.1);
 
       dispatch({ type: "SET_LOCAL_STREAM", payload: destination.stream });
       resolve(destination.stream);

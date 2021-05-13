@@ -18,7 +18,7 @@ import { useInterval } from "./useInterval";
 export const useRTC = (
   roomId: string,
   nickname: string,
-  startLocalStream: () => Promise<MediaStream | null>,
+  startLocalStream: () => Promise<void>,
   localStream: ILocalStreamState["localStream"],
   stopLocalStream: Function
 ) => {

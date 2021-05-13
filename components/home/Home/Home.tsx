@@ -216,7 +216,7 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
           )}
         </div>
 
-        {songInfo && (
+        {isConnected && songInfo && (
           <button
             className={css.songbar}
             onClick={() => {
@@ -227,12 +227,11 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
               }
             }}
           >
-            {formatString(songInfo.title, 50)}
+            <span>{formatString(songInfo.title, 50)}</span>
+            <audio ref={refSongAudio} autoPlay />
           </button>
         )}
       </div>
-
-      <audio ref={refSongAudio} autoPlay />
     </div>
   );
 };

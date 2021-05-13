@@ -1,34 +1,17 @@
 import { useLocalStreamContext } from "store";
 import { mediaStreamConstraints } from "config";
-import { StreamModule } from "./StreamModule";
 
 export const useLocalStream = () => {
   const { state, dispatch } = useLocalStreamContext();
 
   // Controllers
 
-  const startLocalStream: () => Promise<MediaStream | null> = () =>
-    new Promise(async (resolve, reject) => {
-      const audioContext = new AudioContext();
-      const destination = audioContext.createMediaStreamDestination();
-      const streamModule = new StreamModule(audioContext, 4096);
-
-      streamModule
-        .setup(
-          mediaStreamConstraints,
-          () => {},
-          () => {
-            reject(null);
-          }
-        )
-        .ready()
-        .start(destination);
-
-      streamModule.module("noisegate").param("level", 0.15);
-
-      dispatch({ type: "SET_LOCAL_STREAM", payload: destination.stream });
-      resolve(destination.stream);
-    });
+  const startLocalStream = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia(
+      mediaStreamConstraints
+    );
+    dispatch({ type: "SET_LOCAL_STREAM", payload: stream });
+  };
 
   const stopLocalStream = () => {
     const { localStream } = state;

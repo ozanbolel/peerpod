@@ -149,6 +149,16 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
     }
   }, [songQueue, songIndex]);
 
+  React.useEffect(() => {
+    if (!isConnected) {
+      const songAudio = refSongAudio.current;
+
+      if (songAudio && !songAudio.paused) {
+        songAudio.pause();
+      }
+    }
+  }, [isConnected]);
+
   const onSubmit = () => {
     if (!predefinedRoomId) localStorage.setItem("ROOM_ID", roomId);
     localStorage.setItem("NICKNAME", nickname);
@@ -242,7 +252,13 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
               }
             }}
           >
-            <span>{formatString(songQueue[songIndex].title, 50)}</span>
+            {songQueue.length > 1 && (
+              <div className={css.queue}>
+                {songIndex + 1} / {songQueue.length}
+              </div>
+            )}
+
+            <div>{formatString(songQueue[songIndex].title, 50)}</div>
           </button>
         )}
       </div>

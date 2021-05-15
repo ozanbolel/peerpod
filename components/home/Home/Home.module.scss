@@ -164,4 +164,8 @@
   color: $c-dark;
   border-radius: $r;
   animation: songbarIn $de;
+
+  .queue {
+    font-weight: $b;
+  }
 }

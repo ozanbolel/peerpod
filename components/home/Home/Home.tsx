@@ -13,46 +13,30 @@ import { useRTCContext } from "store";
 import { IPeer } from "types";
 import css from "./Home.module.scss";
 
-const PeerCard: React.FC<{ peer: IPeer }> = ({ peer }) => {
-  const refAudio = React.useRef<HTMLAudioElement>(null);
-
+const PeerCard: React.FC<{
+  peer: IPeer;
+  remoteStream: MediaStream;
+  remoteAudio: HTMLAudioElement | null;
+}> = ({ peer, remoteStream, remoteAudio }) => {
   React.useEffect(() => {
-    const audioElement = refAudio.current;
+    playFeedback("on");
 
-    if (audioElement) {
-      playFeedback("on");
+    peer.connection.ontrack = async (event) => {
+      remoteStream.addTrack(event.track);
+      if (remoteAudio) {
+        remoteAudio.muted = true;
+        remoteAudio.muted = false;
+      }
+    };
 
-      peer.connection.ontrack = async (event) => {
-        const stream = new MediaStream();
-        stream.addTrack(event.track);
-
-        audioElement.srcObject = stream;
-        audioElement.pause();
-        audioElement.play();
-      };
-
-      return () => {
-        playFeedback("off");
-      };
-    }
+    return () => {
+      playFeedback("off");
+    };
   }, []);
 
   return (
     <div className={css.peerCard}>
       <span>{peer.nickname}</span>
-      <audio ref={refAudio} autoPlay />
-    </div>
-  );
-};
-
-const Peers: React.FC = () => {
-  const { state } = useRTCContext();
-
-  return (
-    <div className={css.peerCardGrid}>
-      {state.peers.map((peer) => (
-        <PeerCard key={peer.id} peer={peer} />
-      ))}
     </div>
   );
 };
@@ -129,13 +113,12 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
     toggleMuted,
     isMuted
   } = useLocalStream();
-  const { connect, disconnect, isConnected, sendMessage, songInfo } = useRTC(
-    roomId,
-    nickname,
-    startLocalStream,
-    localStream,
-    stopLocalStream
-  );
+  const { connect, disconnect, isConnected, sendMessage, songInfo, peers } =
+    useRTC(roomId, nickname, startLocalStream, localStream, stopLocalStream);
+  const remoteStream = React.useRef(
+    typeof window !== "undefined" ? new MediaStream() : undefined
+  ).current as MediaStream;
+  const refRemoteAudio = React.useRef<HTMLAudioElement>(null);
   const refSongAudio = React.useRef<HTMLAudioElement>(null);
 
   React.useEffect(() => {
@@ -149,13 +132,11 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
   }, []);
 
   React.useEffect(() => {
-    const audioElement = refSongAudio.current;
+    const songAudio = refSongAudio.current;
 
-    if (audioElement && songInfo?.url) {
-      audioElement.src = songInfo.url;
-      audioElement.pause();
-      audioElement.volume = 0.05;
-      audioElement.play();
+    if (songAudio && songInfo?.url) {
+      songAudio.src = songInfo.url;
+      songAudio.play();
     }
   }, [songInfo?.url]);
 
@@ -163,6 +144,19 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
     if (!predefinedRoomId) localStorage.setItem("ROOM_ID", roomId);
     localStorage.setItem("NICKNAME", nickname);
     connect();
+
+    const remoteAudio = refRemoteAudio.current;
+    const songAudio = refSongAudio.current;
+
+    if (remoteAudio) {
+      remoteAudio.srcObject = remoteStream;
+      remoteAudio.play();
+    }
+
+    if (songAudio) {
+      songAudio.volume = 0.04;
+      songAudio.play();
+    }
   };
 
   return (
@@ -176,7 +170,16 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
       <div className={css.tint} />
 
       <div className={css.home}>
-        <Peers />
+        <div className={css.peerCardGrid}>
+          {peers.map((peer) => (
+            <PeerCard
+              key={peer.id}
+              peer={peer}
+              remoteStream={remoteStream}
+              remoteAudio={refRemoteAudio.current}
+            />
+          ))}
+        </div>
 
         {isConnected ? <Messages sendMessage={sendMessage} /> : null}
 
@@ -216,6 +219,9 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
           )}
         </div>
 
+        <audio ref={refRemoteAudio} />
+        <audio ref={refSongAudio} />
+
         {isConnected && songInfo && (
           <button
             className={css.songbar}
@@ -228,7 +234,6 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
             }}
           >
             <span>{formatString(songInfo.title, 50)}</span>
-            <audio ref={refSongAudio} autoPlay />
           </button>
         )}
       </div>

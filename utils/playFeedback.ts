@@ -1,5 +1,7 @@
 type PlayFeedbackType = "pop" | "on" | "off" | "message";
 
 export const playFeedback = (type: PlayFeedbackType) => {
-  new Audio("/audio/" + type + ".mp3").play();
+  const audio = new Audio("/audio/" + type + ".mp3");
+  audio.volume = 0.5;
+  audio.play();
 };

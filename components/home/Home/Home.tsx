@@ -164,6 +164,7 @@ const Home: React.FC<{ predefinedRoomId?: string }> = ({
     if (songAudio && songQueue) {
       songAudio.src = songQueue[songIndex].url;
       songAudio.onended = goNextSong;
+      songAudio.onerror = goNextSong;
       songAudio.play();
     }
   }, [JSON.stringify(songQueue), songIndex]);
@@ -189,7 +190,7 @@ const Home: React.FC<{ predefinedRoomId?: string }> = ({
     }
 
     if (songAudio) {
-      songAudio.volume = 0.04;
+      songAudio.volume = 0.03;
       songAudio.play();
     }
   };

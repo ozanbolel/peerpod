@@ -1,19 +1,13 @@
 import * as React from "react";
 import Linkify from "react-linkify";
+import Marquee from "react-fast-marquee";
 import { Button, Form } from "elements";
-import {
-  useRTC,
-  playFeedback,
-  useLocalStream,
-  cns,
-  generateId,
-  formatString
-} from "utils";
+import { useRTC, playFeedback, useLocalStream, cns, generateId } from "utils";
 import { useRTCContext } from "store";
-import { IPeer } from "types";
+import { IPeer, ISongInfo } from "types";
 import css from "./Home.module.scss";
 
-const PeerCard: React.FC<{
+const Peer: React.FC<{
   peer: IPeer;
   remoteStream: MediaStream;
   remoteAudio: HTMLAudioElement | null;
@@ -34,11 +28,7 @@ const PeerCard: React.FC<{
     };
   }, []);
 
-  return (
-    <div className={css.peerCard}>
-      <span>{peer.nickname}</span>
-    </div>
-  );
+  return <div className={css.peer}>{peer.nickname}</div>;
 };
 
 const Messages: React.FC<{ sendMessage: Function }> = ({ sendMessage }) => {
@@ -62,48 +52,77 @@ const Messages: React.FC<{ sendMessage: Function }> = ({ sendMessage }) => {
 
   return (
     <div className={css.messages}>
-      <div ref={refMessages} className={css.messageList}>
-        {state.messages.map((message) => (
-          <div key={message.id} className={css.messageItem}>
-            <span className={css.bold}>{message.nickname}: </span>
+      <div className={css.messagesInner}>
+        <div ref={refMessages} className={css.messageList}>
+          {state.messages.map((message) => (
+            <div key={message.id} className={css.messageItem}>
+              <span className={css.bold}>{message.nickname}: </span>
 
-            <span>
-              <Linkify
-                componentDecorator={(decoratedHref, decoratedText, key) => (
-                  <a
-                    key={key}
-                    href={decoratedHref}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {decoratedText}
-                  </a>
-                )}
-              >
-                {message.message}
-              </Linkify>
-            </span>
-          </div>
-        ))}
+              <span>
+                <Linkify
+                  componentDecorator={(decoratedHref, decoratedText, key) => (
+                    <a
+                      key={key}
+                      href={decoratedHref}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {decoratedText}
+                    </a>
+                  )}
+                >
+                  {message.message}
+                </Linkify>
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <Form onSubmit={onSubmit}>
+          <Form.Input
+            controller={[message, setMessage]}
+            placeholder="Message..."
+            required
+          />
+          <Form.Submit label="SEND" noSound />
+        </Form>
       </div>
-
-      <Form onSubmit={onSubmit}>
-        <Form.Input
-          controller={[message, setMessage]}
-          placeholder="Message..."
-          required
-        />
-        <Form.Submit label="SEND" noSound />
-      </Form>
     </div>
   );
 };
 
-interface IHomeProps {
-  predefinedRoomId?: string;
-}
+const Songbar: React.FC<{
+  songQueue: ISongInfo[];
+  songIndex: number;
+  onClick?: () => void;
+}> = ({ songQueue, songIndex, onClick }) => {
+  React.useEffect(() => {
+    playFeedback("on");
+  }, []);
 
-const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
+  return (
+    <button className={css.songbar} onClick={onClick}>
+      {songQueue.length > 1 ? (
+        <div className={css.songbarTitle}>
+          <span>Now playing</span>
+          <span className={css.info}>
+            {songIndex + 1}/{songQueue.length}
+          </span>
+        </div>
+      ) : (
+        <div className={css.songbarTitle}>Now playing</div>
+      )}
+
+      <Marquee gradientWidth={15}>
+        <span className={css.songbarText}>{songQueue[songIndex].title}</span>
+      </Marquee>
+    </button>
+  );
+};
+
+const Home: React.FC<{ predefinedRoomId?: string }> = ({
+  predefinedRoomId
+}) => {
   const [roomId, setRoomId] = React.useState(predefinedRoomId || generateId());
   const [nickname, setNickname] = React.useState("");
   const {
@@ -147,15 +166,12 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
       songAudio.onended = goNextSong;
       songAudio.play();
     }
-  }, [songQueue, songIndex]);
+  }, [JSON.stringify(songQueue), songIndex]);
 
   React.useEffect(() => {
     if (!isConnected) {
       const songAudio = refSongAudio.current;
-
-      if (songAudio && !songAudio.paused) {
-        songAudio.pause();
-      }
+      if (songAudio) songAudio.src = "";
     }
   }, [isConnected]);
 
@@ -189,9 +205,9 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
       <div className={css.tint} />
 
       <div className={css.home}>
-        <div className={css.peerCardGrid}>
+        <div className={css.peerGrid}>
           {peers.map((peer) => (
-            <PeerCard
+            <Peer
               key={peer.id}
               peer={peer}
               remoteStream={remoteStream}
@@ -242,8 +258,9 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
         <audio ref={refSongAudio} />
 
         {isConnected && songQueue && (
-          <button
-            className={css.songbar}
+          <Songbar
+            songQueue={songQueue}
+            songIndex={songIndex}
             onClick={() => {
               const songAudioElement = refSongAudio.current;
 
@@ -251,15 +268,7 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
                 songAudioElement.muted = !songAudioElement.muted;
               }
             }}
-          >
-            {songQueue.length > 1 && (
-              <div className={css.queue}>
-                {songIndex + 1} / {songQueue.length}
-              </div>
-            )}
-
-            <div>{formatString(songQueue[songIndex].title, 50)}</div>
-          </button>
+          />
         )}
       </div>
     </div>

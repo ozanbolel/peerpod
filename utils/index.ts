@@ -4,4 +4,3 @@ export * from "./cns";
 export * from "./useRTC";
 export * from "./useLocalStream";
 export * from "./useInterval";
-export * from "./formatString";

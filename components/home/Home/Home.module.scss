@@ -1,5 +1,16 @@
 @import "styles/head";
 
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .homeContainer {
   position: relative;
   width: 100%;
@@ -35,72 +46,30 @@
   height: 100%;
 }
 
-.peerCardGrid {
+.peerGrid {
   flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-  padding: 0 $g-m;
+  padding: $g-s;
 }
 
-.peerCard {
-  @keyframes cardIn {
-    from {
-      opacity: 0;
-      transform: scale(0);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 220px;
-  height: 220px;
+.peer {
   background: $c-light;
   color: $c-dark;
+  padding: $g-xs;
+  font-weight: $b;
+  text-align: center;
   border-radius: $r;
   animation: cardIn $de;
-  margin-right: $g-l;
+  margin-bottom: $g-xs;
 
   &:last-of-type {
-    margin-right: 0;
-  }
-
-  span {
-    font-size: $h3;
-    font-weight: $b;
+    margin-bottom: unset;
   }
 }
 
 .messages {
-  display: flex;
-  flex-direction: column;
-  height: 300px;
+  height: 200px;
   background: rgba($c-dark, 0.3);
-  padding: 0 30%;
-
-  .messageList {
-    flex: 1;
-    overflow-x: hidden;
-    overflow-y: scroll;
-  }
-
-  .messageItem {
-    margin-top: $g-xxs;
-
-    .bold {
-      font-weight: $b;
-    }
-  }
-
-  .messageItem a {
-    border-bottom: solid 1px $c-light;
-  }
+  padding: 0 $g-s;
 
   form {
     display: flex;
@@ -120,17 +89,52 @@
   }
 }
 
+.messagesInner {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.messageList {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+.messageItem {
+  margin-top: $g-xxs;
+
+  .bold {
+    font-weight: $b;
+  }
+}
+
+.messageItem a {
+  border-bottom: solid 1px $c-light;
+}
+
 .actionbar {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 120px;
+  padding: $g-m 0;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+  }
 
   input {
     width: 180px;
     padding: $g-xs;
     text-align: center;
-    margin-right: $g-s;
+    margin-bottom: $g-xs;
+
+    &:last-of-type {
+      margin-bottom: $g-m;
+    }
   }
 
   button {
@@ -144,28 +148,85 @@
   }
 }
 
-@keyframes songbarIn {
-  from {
-    opacity: 0;
-    transform: scale(0.75);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 .songbar {
   position: fixed;
   top: $g-s;
   right: $g-s;
+  width: 260px;
   padding: $g-xs;
   background: $c-light;
   color: $c-dark;
   border-radius: $r;
-  animation: songbarIn $de;
+  text-align: left;
+  animation: cardIn $de;
+}
 
-  .queue {
-    font-weight: $b;
+.songbarTitle {
+  font-weight: $b;
+  margin-bottom: $g-xs;
+
+  .info {
+    margin-left: $g-xs;
+    opacity: 0.6;
+    font-size: $h5;
+  }
+}
+
+.songbarText {
+  margin-right: $g-xxs;
+}
+
+@media only screen and (min-width: 1200px) {
+  .peerGrid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: unset;
+  }
+
+  .peer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 200px;
+    padding: unset;
+    text-align: unset;
+    margin-bottom: unset;
+    margin-right: $g-l;
+
+    &:last-of-type {
+      margin-bottom: unset;
+      margin-right: unset;
+    }
+  }
+
+  .messages {
+    height: 300px;
+    padding: unset;
+  }
+
+  .messagesInner {
+    width: 900px;
+    margin: 0 auto;
+  }
+
+  .actionbar {
+    display: flex;
+    align-items: center;
+    padding: $g-m 0;
+
+    form {
+      flex-direction: row;
+    }
+
+    input {
+      margin-bottom: unset;
+      margin-right: $g-s;
+
+      &:last-of-type {
+        margin-bottom: unset;
+      }
+    }
   }
 }

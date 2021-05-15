@@ -6,7 +6,8 @@ export interface IRTCState {
   isConnected: boolean;
   peers: IPeer[];
   messages: IPeerMessage[];
-  songInfo: ISongInfo | undefined;
+  songQueue: ISongInfo[] | undefined;
+  songIndex: number;
 }
 
 export type RTCActionType =
@@ -14,7 +15,8 @@ export type RTCActionType =
   | "ADD_PEER"
   | "REMOVE_PEER"
   | "ADD_MESSAGE"
-  | "SET_SONG_INFO"
+  | "SET_SONG_QUEUE"
+  | "SET_SONG_INDEX"
   | "RESET_RTC";
 
 export interface IRTCAction {

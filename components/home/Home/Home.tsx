@@ -113,8 +113,16 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
     toggleMuted,
     isMuted
   } = useLocalStream();
-  const { connect, disconnect, isConnected, sendMessage, songInfo, peers } =
-    useRTC(roomId, nickname, startLocalStream, localStream, stopLocalStream);
+  const {
+    connect,
+    disconnect,
+    isConnected,
+    sendMessage,
+    songQueue,
+    songIndex,
+    peers,
+    goNextSong
+  } = useRTC(roomId, nickname, startLocalStream, localStream, stopLocalStream);
   const remoteStream = React.useRef(
     typeof window !== "undefined" ? new MediaStream() : undefined
   ).current as MediaStream;
@@ -134,11 +142,12 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
   React.useEffect(() => {
     const songAudio = refSongAudio.current;
 
-    if (songAudio && songInfo?.url) {
-      songAudio.src = songInfo.url;
+    if (songAudio && songQueue) {
+      songAudio.src = songQueue[songIndex].url;
+      songAudio.onended = goNextSong;
       songAudio.play();
     }
-  }, [songInfo?.url]);
+  }, [songQueue, songIndex]);
 
   const onSubmit = () => {
     if (!predefinedRoomId) localStorage.setItem("ROOM_ID", roomId);
@@ -222,7 +231,7 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
         <audio ref={refRemoteAudio} />
         <audio ref={refSongAudio} />
 
-        {isConnected && songInfo && (
+        {isConnected && songQueue && (
           <button
             className={css.songbar}
             onClick={() => {
@@ -233,7 +242,7 @@ const Home: React.FC<IHomeProps> = ({ predefinedRoomId }) => {
               }
             }}
           >
-            <span>{formatString(songInfo.title, 50)}</span>
+            <span>{formatString(songQueue[songIndex].title, 50)}</span>
           </button>
         )}
       </div>

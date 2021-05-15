@@ -5,7 +5,8 @@ const rtcInitialState: IRTCState = {
   isConnected: false,
   peers: [],
   messages: [],
-  songInfo: undefined
+  songQueue: undefined,
+  songIndex: 0
 };
 
 const rtcReducer = (state: IRTCState, action: IRTCAction) => {
@@ -30,9 +31,15 @@ const rtcReducer = (state: IRTCState, action: IRTCAction) => {
         messages: [...state.messages, action.payload]
       });
 
-    case "SET_SONG_INFO":
+    case "SET_SONG_QUEUE":
       return Object.assign({}, state, {
-        songInfo: action.payload
+        songQueue: action.payload,
+        songIndex: 0
+      });
+
+    case "SET_SONG_INDEX":
+      return Object.assign({}, state, {
+        songIndex: action.payload
       });
 
     case "RESET_RTC":

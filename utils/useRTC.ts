@@ -55,10 +55,6 @@ export const useRTC = (
 
   // Chat
 
-  const requestSong = (query: string) => {
-    socket.emit("song-request", { query });
-  };
-
   const sendMessage = (message: string) => {
     dispatch({
       type: "ADD_MESSAGE",
@@ -67,8 +63,24 @@ export const useRTC = (
     socket.emit("message", { nickname, message });
 
     if (message.substring(0, 6) === "!play ") {
-      const query = message.substring(6).trim();
-      if (query) requestSong(query);
+      const query = message.substring(6);
+      if (query) socket.emit("song-request", { query });
+    }
+
+    if (message.substring(0, 10) === "!playlist ") {
+      const query = message.substring(10);
+      if (query) socket.emit("song-request-playlist", { query });
+    }
+  };
+
+  // Music Control
+
+  const goNextSong = () => {
+    if (state.songQueue) {
+      dispatch({
+        type: "SET_SONG_INDEX",
+        payload: Math.min(state.songIndex + 1, state.songQueue.length - 1)
+      });
     }
   };
 
@@ -231,15 +243,15 @@ export const useRTC = (
     };
   }, []);
 
-  // On Song Change
+  // On Song Queue
 
   React.useEffect(() => {
-    socket.on("song-change", (data: ISongInfo) => {
-      dispatch({ type: "SET_SONG_INFO", payload: data });
+    socket.on("song-queue", (data: ISongInfo[]) => {
+      dispatch({ type: "SET_SONG_QUEUE", payload: data });
     });
 
     return () => {
-      socket.off("song-change");
+      socket.off("song-queue");
     };
   }, []);
 
@@ -249,7 +261,7 @@ export const useRTC = (
     connect,
     disconnect,
     sendMessage,
-    requestSong,
+    goNextSong,
     ...state
   };
 };

@@ -35,7 +35,9 @@ export const useRTC = (
         .then(() => {
           dispatch({ type: "SET_IS_CONNECTED", payload: true });
           if (!socket.connected) socket.open();
-          socket.emit("discover", { roomId });
+          setTimeout(() => {
+            socket.emit("discover", { roomId });
+          }, 500);
           setTimeout(() => {
             socket.emit("song-request-sync");
           }, 1000);

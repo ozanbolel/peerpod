@@ -259,14 +259,14 @@ const Room: React.FC<{ roomId: string }> = ({ roomId }) => {
 
         {React.useMemo(
           () => (
-            <audio ref={refRemoteAudio} autoPlay />
+            <audio ref={refRemoteAudio} autoPlay playsInline />
           ),
           []
         )}
 
         {React.useMemo(
           () => (
-            <audio ref={refSongAudio} autoPlay />
+            <audio ref={refSongAudio} autoPlay playsInline />
           ),
           []
         )}

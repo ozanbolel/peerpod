@@ -28,16 +28,7 @@ const Peer: React.FC<{
     };
   }, []);
 
-  return (
-    <div
-      className={css.peer}
-      onClick={() => {
-        remoteAudio?.play();
-      }}
-    >
-      {peer.nickname}
-    </div>
-  );
+  return <div className={css.peer}>{peer.nickname}</div>;
 };
 
 const Chat: React.FC<{ sendMessage: Function }> = ({ sendMessage }) => {

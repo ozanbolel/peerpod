@@ -28,7 +28,16 @@ const Peer: React.FC<{
     };
   }, []);
 
-  return <div className={css.peer}>{peer.nickname}</div>;
+  return (
+    <div
+      className={css.peer}
+      onClick={() => {
+        remoteAudio?.play();
+      }}
+    >
+      {peer.nickname}
+    </div>
+  );
 };
 
 const Chat: React.FC<{ sendMessage: Function }> = ({ sendMessage }) => {
@@ -248,8 +257,19 @@ const Room: React.FC<{ roomId: string }> = ({ roomId }) => {
           )}
         </div>
 
-        <audio ref={refRemoteAudio} autoPlay />
-        <audio ref={refSongAudio} autoPlay />
+        {React.useMemo(
+          () => (
+            <audio ref={refRemoteAudio} autoPlay />
+          ),
+          []
+        )}
+
+        {React.useMemo(
+          () => (
+            <audio ref={refSongAudio} autoPlay />
+          ),
+          []
+        )}
 
         {isConnected && songQueue && (
           <Songbar

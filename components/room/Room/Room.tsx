@@ -158,9 +158,10 @@ const Room: React.FC<{ roomId: string }> = ({ roomId }) => {
       if (songAudio.srcObject) songAudio.srcObject = null;
       if (songAudio.src !== songQueue[songIndex].url) {
         songAudio.src = songQueue[songIndex].url;
+        songAudio.onended = skipSong;
+        songAudio.onerror = skipSong;
+        songAudio.play();
       }
-      songAudio.onended = skipSong;
-      songAudio.onerror = skipSong;
     }
   }, [JSON.stringify(songQueue), songIndex]);
 

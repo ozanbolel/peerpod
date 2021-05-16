@@ -40,7 +40,7 @@ export const useRTC = (
           }, 500);
           setTimeout(() => {
             socket.emit("song-request-sync");
-          }, 1000);
+          }, 1500);
         })
         .catch(() => {});
     }

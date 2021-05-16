@@ -177,7 +177,7 @@ const Room: React.FC<{ roomId: string }> = ({ roomId }) => {
     const songAudio = refSongAudio.current;
 
     if (remoteAudio) {
-      remoteAudio.srcObject = remoteStream;
+      remoteAudio.srcObject = new MediaStream();
       remoteAudio.play();
     }
 

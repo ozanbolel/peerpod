@@ -2,28 +2,28 @@ import * as React from "react";
 import Linkify from "react-linkify";
 import Marquee from "react-fast-marquee";
 import { Button, Form } from "elements";
-import { useRTC, playFeedback, useLocalStream, cns, generateId } from "utils";
+import { useRTC, playFeedback, useLocalStream, cns } from "utils";
 import { useRTCContext } from "store";
 import { IPeer, ISongInfo } from "types";
-import css from "./Home.module.scss";
+import css from "./Room.module.scss";
 
 const Peer: React.FC<{
   peer: IPeer;
   remoteStream: MediaStream;
   remoteAudio: HTMLAudioElement | null;
 }> = ({ peer, remoteStream, remoteAudio }) => {
-  React.useEffect(() => {
-    playFeedback("on");
+  const refTrack = React.useRef<MediaStreamTrack | undefined>(undefined);
 
+  React.useEffect(() => {
     peer.connection.ontrack = async (event) => {
       remoteStream.addTrack(event.track);
-      if (remoteAudio) {
-        remoteAudio.muted = true;
-        remoteAudio.muted = false;
-      }
+      remoteAudio?.load();
+      refTrack.current = event.track;
     };
+    playFeedback("on");
 
     return () => {
+      if (refTrack.current) remoteStream.removeTrack(refTrack.current);
       playFeedback("off");
     };
   }, []);
@@ -31,7 +31,7 @@ const Peer: React.FC<{
   return <div className={css.peer}>{peer.nickname}</div>;
 };
 
-const Messages: React.FC<{ sendMessage: Function }> = ({ sendMessage }) => {
+const Chat: React.FC<{ sendMessage: Function }> = ({ sendMessage }) => {
   const [message, setMessage] = React.useState("");
   const { state } = useRTCContext();
   const refMessages = React.useRef<HTMLDivElement>(null);
@@ -51,8 +51,8 @@ const Messages: React.FC<{ sendMessage: Function }> = ({ sendMessage }) => {
   };
 
   return (
-    <div className={css.messages}>
-      <div className={css.messagesInner}>
+    <div className={css.chat}>
+      <div className={css.chatInner}>
         <div ref={refMessages} className={css.messageList}>
           {state.messages.map((message) => (
             <div key={message.id} className={css.messageItem}>
@@ -113,17 +113,14 @@ const Songbar: React.FC<{
         <div className={css.songbarTitle}>Now playing</div>
       )}
 
-      <Marquee gradientWidth={15}>
+      <Marquee gradientWidth={12}>
         <span className={css.songbarText}>{songQueue[songIndex].title}</span>
       </Marquee>
     </button>
   );
 };
 
-const Home: React.FC<{ predefinedRoomId?: string }> = ({
-  predefinedRoomId
-}) => {
-  const [roomId, setRoomId] = React.useState(predefinedRoomId || generateId());
+const Room: React.FC<{ roomId: string }> = ({ roomId }) => {
   const [nickname, setNickname] = React.useState("");
   const {
     startLocalStream,
@@ -147,13 +144,9 @@ const Home: React.FC<{ predefinedRoomId?: string }> = ({
   ).current as MediaStream;
   const refRemoteAudio = React.useRef<HTMLAudioElement>(null);
   const refSongAudio = React.useRef<HTMLAudioElement>(null);
+  const refIsConnectedBefore = React.useRef(false);
 
   React.useEffect(() => {
-    if (!predefinedRoomId) {
-      const storedRoomId = localStorage.getItem("ROOM_ID");
-      if (storedRoomId) setRoomId(storedRoomId);
-    }
-
     const storedNickname = localStorage.getItem("NICKNAME");
     if (storedNickname) setNickname(storedNickname);
   }, []);
@@ -162,22 +155,21 @@ const Home: React.FC<{ predefinedRoomId?: string }> = ({
     const songAudio = refSongAudio.current;
 
     if (songAudio && songQueue) {
+      if (songAudio.srcObject) songAudio.srcObject = null;
       songAudio.src = songQueue[songIndex].url;
       songAudio.onended = goNextSong;
       songAudio.onerror = goNextSong;
-      songAudio.play();
     }
   }, [JSON.stringify(songQueue), songIndex]);
 
   React.useEffect(() => {
-    if (!isConnected) {
+    if (!isConnected && refIsConnectedBefore.current) {
       const songAudio = refSongAudio.current;
-      if (songAudio) songAudio.src = "";
+      if (songAudio) songAudio.pause();
     }
   }, [isConnected]);
 
   const onSubmit = () => {
-    if (!predefinedRoomId) localStorage.setItem("ROOM_ID", roomId);
     localStorage.setItem("NICKNAME", nickname);
     connect();
 
@@ -190,22 +182,30 @@ const Home: React.FC<{ predefinedRoomId?: string }> = ({
     }
 
     if (songAudio) {
-      songAudio.volume = 0.03;
+      songAudio.srcObject = new MediaStream();
+      songAudio.volume = 0.035;
       songAudio.play();
     }
+
+    refIsConnectedBefore.current = true;
+  };
+
+  const onClickSongbar = () => {
+    const songAudioElement = refSongAudio.current;
+    if (songAudioElement) songAudioElement.muted = !songAudioElement.muted;
   };
 
   return (
     <div
       className={cns([
-        css.homeContainer,
+        css.container,
         [css.connected, isConnected],
         [css.muted, isMuted]
       ])}
     >
       <div className={css.tint} />
 
-      <div className={css.home}>
+      <div className={css.inner}>
         <div className={css.peerGrid}>
           {peers.map((peer) => (
             <Peer
@@ -217,7 +217,7 @@ const Home: React.FC<{ predefinedRoomId?: string }> = ({
           ))}
         </div>
 
-        {isConnected ? <Messages sendMessage={sendMessage} /> : null}
+        {isConnected && <Chat sendMessage={sendMessage} />}
 
         <div className={css.actionbar}>
           {isConnected ? (
@@ -235,14 +235,6 @@ const Home: React.FC<{ predefinedRoomId?: string }> = ({
             </>
           ) : (
             <Form onSubmit={onSubmit}>
-              {!predefinedRoomId && (
-                <Form.Input
-                  controller={[roomId, setRoomId]}
-                  placeholder="Room ID..."
-                  length={16}
-                  required
-                />
-              )}
               <Form.Input
                 controller={[nickname, setNickname]}
                 placeholder="Nickname..."
@@ -250,25 +242,20 @@ const Home: React.FC<{ predefinedRoomId?: string }> = ({
                 maxLength={36}
                 required
               />
+
               <Form.Submit label="CONNECT" />
             </Form>
           )}
         </div>
 
-        <audio ref={refRemoteAudio} />
-        <audio ref={refSongAudio} />
+        <audio ref={refRemoteAudio} autoPlay />
+        <audio ref={refSongAudio} autoPlay />
 
         {isConnected && songQueue && (
           <Songbar
             songQueue={songQueue}
             songIndex={songIndex}
-            onClick={() => {
-              const songAudioElement = refSongAudio.current;
-
-              if (songAudioElement) {
-                songAudioElement.muted = !songAudioElement.muted;
-              }
-            }}
+            onClick={onClickSongbar}
           />
         )}
       </div>
@@ -276,4 +263,4 @@ const Home: React.FC<{ predefinedRoomId?: string }> = ({
   );
 };
 
-export default Home;
+export default Room;

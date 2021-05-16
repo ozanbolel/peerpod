@@ -1,9 +1,9 @@
 import * as React from "react";
 import { NextPage } from "next";
-import Home from "components/home/Home/Home";
+import Landing from "components/landing/Landing/Landing";
 
-const IndexPage: NextPage = () => {
-  return <Home />;
+const LandingPage: NextPage = () => {
+  return <Landing />;
 };
 
-export default IndexPage;
+export default LandingPage;

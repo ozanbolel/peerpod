@@ -1,14 +1,19 @@
 import * as React from "react";
 import { useRouter } from "next/router";
 import { NextPage } from "next";
-import Home from "components/home/Home/Home";
+import { ROOM_ID_LENGTH } from "config";
+import Room from "components/room/Room/Room";
 
 const RoomPage: NextPage = () => {
   const router = useRouter();
-  const predefinedRoomId = router.query.roomId as string | undefined;
+  const roomId = router.query.roomId as string | undefined;
 
-  if (predefinedRoomId) {
-    return <Home predefinedRoomId={predefinedRoomId} />;
+  React.useEffect(() => {
+    if (roomId && roomId.length !== ROOM_ID_LENGTH) router.replace("/");
+  }, [roomId]);
+
+  if (roomId && roomId.length === ROOM_ID_LENGTH) {
+    return <Room roomId={roomId} />;
   } else {
     return null;
   }

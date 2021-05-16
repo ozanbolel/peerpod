@@ -1,3 +1,5 @@
+import { ROOM_ID_LENGTH } from "config";
+
 const dec2hex = (num: number) => {
   return num < 10 ? "0" + String(num) : num.toString(16);
 };
@@ -11,7 +13,7 @@ const gen = (len: number) => {
   return hexArray.join("");
 };
 
-export const generateId = (length = 16) => {
+export const generateId = (length = ROOM_ID_LENGTH) => {
   if (typeof window !== "undefined") {
     let result = "";
 

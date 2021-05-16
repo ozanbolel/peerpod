@@ -1,3 +1,5 @@
+import { IRTCState } from "./store";
+
 export interface IPeerCore {
   id: string;
 }
@@ -34,4 +36,10 @@ export interface IPeerMessage extends IPeerMessageData {
 export interface ISongInfo {
   title: string;
   url: string;
+}
+
+export interface ISongSyncInfo {
+  songQueue: IRTCState["songQueue"];
+  songIndex: IRTCState["songIndex"];
+  currentTime: number;
 }

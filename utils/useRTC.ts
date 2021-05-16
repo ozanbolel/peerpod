@@ -10,7 +10,8 @@ import {
   IPeerCandidate,
   ILocalStreamState,
   IPeerMessageData,
-  ISongInfo
+  ISongInfo,
+  ISongSyncInfo
 } from "types";
 import { generateId } from "./generateId";
 import { useInterval } from "./useInterval";
@@ -23,6 +24,7 @@ export const useRTC = (
   stopLocalStream: Function
 ) => {
   const socket = React.useRef(io(serverUrl, { autoConnect: false })).current;
+  const refSongAudio = React.useRef<HTMLAudioElement>(null);
   const { state, dispatch } = useRTCContext();
 
   // Connection
@@ -32,9 +34,11 @@ export const useRTC = (
       startLocalStream()
         .then(() => {
           dispatch({ type: "SET_IS_CONNECTED", payload: true });
-
           if (!socket.connected) socket.open();
           socket.emit("discover", { roomId });
+          setTimeout(() => {
+            socket.emit("song-request-sync");
+          }, 1000);
         })
         .catch(() => {});
     }
@@ -71,17 +75,37 @@ export const useRTC = (
       const query = message.substring(10);
       if (query) socket.emit("song-request-playlist", { query });
     }
+
+    if (message === "!sync") {
+      socket.emit("song-request-sync");
+    }
+
+    if (message === "!skip") {
+      socket.emit("song-request-skip");
+    }
+
+    if (message.substring(0, 5) === "!add ") {
+      const query = message.substring(5);
+      if (query) socket.emit("song-request-add", { query });
+    }
+
+    if (message === "!stop") {
+      socket.emit("song-request-stop");
+    }
   };
 
   // Music Control
 
-  const goNextSong = () => {
-    if (state.songQueue) {
-      dispatch({
-        type: "SET_SONG_INDEX",
-        payload: Math.min(state.songIndex + 1, state.songQueue.length - 1)
-      });
-    }
+  const skipSong = () => {
+    dispatch({ type: "SKIP_SONG" });
+  };
+
+  const addSong = (data: ISongInfo) => {
+    dispatch({ type: "ADD_SONG", payload: data });
+  };
+
+  const removeSongQueue = () => {
+    dispatch({ type: "SET_SONG_QUEUE", payload: undefined });
   };
 
   // Create Peer Connection
@@ -255,13 +279,76 @@ export const useRTC = (
     };
   }, []);
 
+  // On Song Sync Request
+
+  React.useEffect(() => {
+    socket.on("song-request-sync", () => {
+      socket.emit("song-sync", {
+        songQueue: state.songQueue,
+        songIndex: state.songIndex,
+        currentTime: refSongAudio.current?.currentTime || 0
+      } as ISongSyncInfo);
+    });
+
+    return () => {
+      socket.off("song-request-sync");
+    };
+  }, [JSON.stringify(state.songQueue), state.songIndex]);
+
+  // On Song Sync
+
+  React.useEffect(() => {
+    socket.on("song-sync", async (data: ISongSyncInfo) => {
+      dispatch({ type: "SET_SONG_QUEUE", payload: data.songQueue });
+      dispatch({ type: "SET_SONG_INDEX", payload: data.songIndex });
+      if (refSongAudio.current) {
+        refSongAudio.current.currentTime = data.currentTime;
+      }
+    });
+
+    return () => {
+      socket.off("song-sync");
+    };
+  }, []);
+
+  // On Song Skip
+
+  React.useEffect(() => {
+    socket.on("song-skip", skipSong);
+
+    return () => {
+      socket.off("song-skip");
+    };
+  }, []);
+
+  // On Song Add
+
+  React.useEffect(() => {
+    socket.on("song-add", addSong);
+
+    return () => {
+      socket.off("song-add");
+    };
+  }, []);
+
+  // On Song Stop
+
+  React.useEffect(() => {
+    socket.on("song-stop", removeSongQueue);
+
+    return () => {
+      socket.off("song-stop");
+    };
+  }, []);
+
   // Return
 
   return {
     connect,
     disconnect,
     sendMessage,
-    goNextSong,
+    skipSong,
+    refSongAudio,
     ...state
   };
 };

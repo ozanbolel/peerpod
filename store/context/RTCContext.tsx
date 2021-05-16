@@ -42,6 +42,20 @@ const rtcReducer = (state: IRTCState, action: IRTCAction) => {
         songIndex: action.payload
       });
 
+    case "SKIP_SONG":
+      return Object.assign({}, state, {
+        songIndex: state.songQueue
+          ? Math.min(state.songIndex + 1, state.songQueue.length - 1)
+          : state.songIndex
+      });
+
+    case "ADD_SONG":
+      return Object.assign({}, state, {
+        songQueue: state.songQueue
+          ? [...state.songQueue, action.payload]
+          : [action.payload]
+      });
+
     case "RESET_RTC":
       return rtcInitialState;
 

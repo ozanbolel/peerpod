@@ -17,6 +17,8 @@ export type RTCActionType =
   | "ADD_MESSAGE"
   | "SET_SONG_QUEUE"
   | "SET_SONG_INDEX"
+  | "SKIP_SONG"
+  | "ADD_SONG"
   | "RESET_RTC";
 
 export interface IRTCAction {

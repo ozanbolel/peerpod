@@ -137,13 +137,13 @@ const Room: React.FC<{ roomId: string }> = ({ roomId }) => {
     songQueue,
     songIndex,
     peers,
-    goNextSong
+    skipSong,
+    refSongAudio
   } = useRTC(roomId, nickname, startLocalStream, localStream, stopLocalStream);
   const remoteStream = React.useRef(
     typeof window !== "undefined" ? new MediaStream() : undefined
   ).current as MediaStream;
   const refRemoteAudio = React.useRef<HTMLAudioElement>(null);
-  const refSongAudio = React.useRef<HTMLAudioElement>(null);
   const refIsConnectedBefore = React.useRef(false);
 
   React.useEffect(() => {
@@ -156,9 +156,11 @@ const Room: React.FC<{ roomId: string }> = ({ roomId }) => {
 
     if (songAudio && songQueue) {
       if (songAudio.srcObject) songAudio.srcObject = null;
-      songAudio.src = songQueue[songIndex].url;
-      songAudio.onended = goNextSong;
-      songAudio.onerror = goNextSong;
+      if (songAudio.src !== songQueue[songIndex].url) {
+        songAudio.src = songQueue[songIndex].url;
+      }
+      songAudio.onended = skipSong;
+      songAudio.onerror = skipSong;
     }
   }, [JSON.stringify(songQueue), songIndex]);
 
@@ -168,6 +170,16 @@ const Room: React.FC<{ roomId: string }> = ({ roomId }) => {
       if (songAudio) songAudio.pause();
     }
   }, [isConnected]);
+
+  React.useEffect(() => {
+    if (isConnected && typeof songQueue === "undefined") {
+      const songAudio = refSongAudio.current;
+
+      if (songAudio && songAudio.src && !songAudio.paused) {
+        songAudio.pause();
+      }
+    }
+  }, [isConnected, typeof songQueue === "undefined"]);
 
   const onSubmit = () => {
     localStorage.setItem("NICKNAME", nickname);

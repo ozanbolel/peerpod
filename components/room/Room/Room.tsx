@@ -17,7 +17,7 @@ const Peer: React.FC<{
   React.useEffect(() => {
     peer.connection.ontrack = async (event) => {
       remoteStream.addTrack(event.track);
-      remoteAudio?.load();
+      if (remoteAudio) remoteAudio.srcObject = remoteStream.clone();
       refTrack.current = event.track;
     };
     playFeedback("on");

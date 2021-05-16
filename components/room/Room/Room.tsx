@@ -154,14 +154,11 @@ const Room: React.FC<{ roomId: string }> = ({ roomId }) => {
   React.useEffect(() => {
     const songAudio = refSongAudio.current;
 
-    if (songAudio && songQueue) {
-      if (songAudio.srcObject) songAudio.srcObject = null;
-      if (songAudio.src !== songQueue[songIndex].url) {
-        songAudio.src = songQueue[songIndex].url;
-        songAudio.onended = skipSong;
-        songAudio.onerror = skipSong;
-        songAudio.play();
-      }
+    if (songAudio && songQueue && songAudio.src !== songQueue[songIndex].url) {
+      songAudio.src = songQueue[songIndex].url;
+      songAudio.onended = skipSong;
+      songAudio.onerror = skipSong;
+      songAudio.play();
     }
   }, [JSON.stringify(songQueue), songIndex]);
 
@@ -195,7 +192,6 @@ const Room: React.FC<{ roomId: string }> = ({ roomId }) => {
     }
 
     if (songAudio) {
-      songAudio.srcObject = new MediaStream();
       songAudio.volume = 0.035;
       songAudio.play();
     }
@@ -270,7 +266,7 @@ const Room: React.FC<{ roomId: string }> = ({ roomId }) => {
 
         {React.useMemo(
           () => (
-            <audio ref={refSongAudio} autoPlay playsInline />
+            <audio ref={refSongAudio} src="" autoPlay playsInline />
           ),
           []
         )}
